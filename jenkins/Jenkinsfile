@@ -19,11 +19,19 @@ pipeline {
                 sh './jenkins/scripts/test.sh'
             }
         }
+        stage('Manual Approval') {
+            steps {
+                input message: 'Lanjutkan ke tahap Deploy?', ok: 'Proceed', submitter: 'user', parameters: [choice(name: 'ACTION', choices: ['Proceed', 'Abort'], description: 'Pilih tindakan')]
+            }
+        }
         stage('Deploy') {
             steps {
                 sh './jenkins/scripts/deliver.sh'
-                input message: 'Sudah selesai menggunakan App? (Klik "Proceed" untuk mengakhiri)'
-                sh './jenkins/scripts/kill.sh'
+                script {
+                    echo "Waiting for 1 minute..."
+                    sleep(time: 1, unit: 'MINUTES')
+                    sh './jenkins/scripts/kill.sh'
+                }
             }
         }
     }
